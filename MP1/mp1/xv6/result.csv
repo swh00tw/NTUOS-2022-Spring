@@ -1,0 +1,14 @@
+== Test thread package with public testcase 0 (20%) ==
+thread package with public testcase 0: OK (19.0s)
+== Test thread package with public testcase 1 (20%) ==
+thread package with public testcase 1: OK (1.1s)
+== Test thread package with private testcase 0 (15%) ==
+thread package with private testcase 0: FAIL (1.2s)
+    [Error] Output on line 52: 'thread 15: 3', should be 'thread 3: 3'
+== Test thread package with private testcase 1 (15%) ==
+thread package with private testcase 1: FAIL (1.1s)
+    [Error] Output on line 16: 'thread 3: 1', should be 'thread 6: 0'
+== Test thread package with private testcase 2 (15%) ==
+thread package with private testcase 2: FAIL (0.9s)
+    [Error] Output on line 7: 'thread 1: 2', should be 'thread 3: 1'
+== Test thread package with private testcase 3 (15%) ==
