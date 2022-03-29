@@ -448,9 +448,7 @@ static int find_last_entry(pagetable_t pagetable){
 }
 
 static uint64 va_base = 0x0000000000000000;
-static uint64 vaMask = 0x0000007FFFFFFFFF;
 
-// TODO: va calculation
 static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast, int isGrandParentLast, int parentIdx, int GrandParentIdx){
   if (depth<=3){
     int last_entry = find_last_entry(pagetable);
@@ -488,8 +486,21 @@ static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast,
         int flag_X = flags & PTE_X;
         int flag_U = flags & PTE_U;
         if (i==last_entry){
-          uint64 va = (va_base + (i*PGSIZE) + (parentIdx*512*PGSIZE) + (GrandParentIdx*512*512*PGSIZE));
-          printf("└── %d: pte=%p va=%p pa=%p",i,pagetable[i], va&vaMask, lower_pagetable);
+          uint64 va = va_base;
+          if (depth==3){
+            uint64 depth3Offset = (uint64) i*PGSIZE;
+            uint64 depth2Offset = (uint64) parentIdx*512*PGSIZE;
+            uint64 depth1Offset = (uint64) GrandParentIdx*512*512*PGSIZE;
+            va += depth1Offset + depth2Offset + depth3Offset;
+          } else if (depth==2){
+            uint64 depth2Offset = (uint64) i*512*PGSIZE;
+            uint64 depth1Offset = (uint64) parentIdx*512*512*PGSIZE;
+            va += depth1Offset + depth2Offset;
+          } else if (depth==1){
+            uint64 depth1Offset = (uint64) i*512*512*PGSIZE;
+            va += depth1Offset;
+          }
+          printf("└── %d: pte=%p va=%p pa=%p",i,pagetable[i], va, lower_pagetable);
           if (flag_V){
             printf(" V");
           }
@@ -506,12 +517,24 @@ static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast,
             printf(" U");
           }
           printf("\n");
-          //printf("%d %d\n", parentIdx, GrandParentIdx);
           vmprint_children((pagetable_t)lower_pagetable, depth+1, 1, isParentLast, i, parentIdx);
         }
         else {
-          uint64 va = va_base + (i*PGSIZE) + (parentIdx*512*PGSIZE) + (GrandParentIdx*512*512*PGSIZE);
-          printf("├── %d: pte=%p va=%p pa=%p",i,pagetable[i], va&vaMask, lower_pagetable);
+          uint64 va = va_base;
+          if (depth==3){
+            uint64 depth3Offset = (uint64) i*PGSIZE;
+            uint64 depth2Offset = (uint64) parentIdx*512*PGSIZE;
+            uint64 depth1Offset = (uint64) GrandParentIdx*512*512*PGSIZE;
+            va += depth1Offset + depth2Offset + depth3Offset;
+          } else if (depth==2){
+            uint64 depth2Offset = (uint64) i*512*PGSIZE;
+            uint64 depth1Offset = (uint64) parentIdx*512*512*PGSIZE;
+            va += depth1Offset + depth2Offset;
+          } else if (depth==1){
+            uint64 depth1Offset = (uint64) i*512*512*PGSIZE;
+            va += depth1Offset;
+          }
+          printf("├── %d: pte=%p va=%p pa=%p",i,pagetable[i], va, lower_pagetable);
           if (flag_V){
             printf(" V");
           }
@@ -528,7 +551,6 @@ static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast,
             printf(" U");
           }
           printf("\n");
-          //printf("%d %d\n", parentIdx, GrandParentIdx);
           vmprint_children((pagetable_t)lower_pagetable, depth+1, 0, isParentLast, i, parentIdx);
         }
       } 
