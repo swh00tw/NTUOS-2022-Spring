@@ -49,8 +49,22 @@ usertrap(void)
   
   // save user program counter.
   p->trapframe->epc = r_sepc();
+
+  // CHANGED: caught page fault, so we need to handle it.
+  // 13: page load fault
+  // 15: page write fault
+  // ----------
+  if (r_scause() == 13 || r_scause() == 15) {
+    int res = handle_pgfault();
+    if (res==-1){
+      // failed, killed the process
+      p->killed = 1;
+    }
+    // else, do nothing             
+  }
+  // ----------
   
-  if(r_scause() == 8){
+  else if(r_scause() == 8){
     // system call
 
     if(p->killed)
