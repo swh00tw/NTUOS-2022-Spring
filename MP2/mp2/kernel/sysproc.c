@@ -48,8 +48,29 @@ sys_sbrk(void)
     return -1;
   
   addr = myproc()->sz;
-  if(growproc(n) < 0)
-    return -1;
+
+  // simply increase the size of the process if n is positive
+  struct proc* current_process = myproc();
+  if (n>0){
+    current_process->sz = current_process->sz + n;
+  }
+  // if n is negative, use uvmdealloc to deallocate the memory
+  else if (n<0){
+    if (current_process->sz + n < 0){
+      return -1;
+    }
+    else{
+      uvmdealloc(current_process->pagetable, current_process->sz, current_process->sz+n);
+      current_process->sz = current_process->sz + n;
+    }
+  }
+
+  // do not allocated, so comment out these lines
+  // ------------------------------
+  // if(growproc(n) < 0)
+  //   return -1;
+  // ------------------------------
+
   return addr;
 }
 
