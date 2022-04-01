@@ -487,6 +487,7 @@ static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast,
         int flag_W = flags & PTE_W;
         int flag_X = flags & PTE_X;
         int flag_U = flags & PTE_U;
+        int flag_S = flags & PTE_S;
         if (i==last_entry){
           uint64 va = va_base;
           if (depth==3){
@@ -502,7 +503,12 @@ static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast,
             uint64 depth1Offset = (uint64) i*512*512*PGSIZE;
             va += depth1Offset;
           }
-          printf("└── %d: pte=%p va=%p pa=%p",i,pagetable[i], va, lower_pagetable);
+          printf("└── %d: pte=%p va=%p",i,pagetable[i], va);
+          if (flag_S){
+            printf(" blockno=%p", PTE2BLOCKNO(pagetable[i]));
+          } else {
+            printf(" pa=%p", lower_pagetable);
+          }
           if (flag_V){
             printf(" V");
           }
@@ -517,6 +523,9 @@ static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast,
           }
           if (flag_U){
             printf(" U");
+          }
+          if (flag_S){
+            printf(" S");
           }
           printf("\n");
           vmprint_children((pagetable_t)lower_pagetable, depth+1, 1, isParentLast, i, parentIdx);
@@ -536,7 +545,12 @@ static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast,
             uint64 depth1Offset = (uint64) i*512*512*PGSIZE;
             va += depth1Offset;
           }
-          printf("├── %d: pte=%p va=%p pa=%p",i,pagetable[i], va, lower_pagetable);
+          printf("├── %d: pte=%p va=%p",i,pagetable[i], va);
+          if (flag_S){
+            printf(" blockno=%p", PTE2BLOCKNO(pagetable[i]));
+          } else {
+            printf(" pa=%p", lower_pagetable);
+          }
           if (flag_V){
             printf(" V");
           }
@@ -551,6 +565,9 @@ static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast,
           }
           if (flag_U){
             printf(" U");
+          }
+          if (flag_S){
+            printf(" S");
           }
           printf("\n");
           vmprint_children((pagetable_t)lower_pagetable, depth+1, 0, isParentLast, i, parentIdx);
