@@ -589,5 +589,27 @@ void vmprint(pagetable_t pagetable) {
 /* Map pages to physical memory or swap space. */
 int madvise(uint64 base, uint64 len, int advice) {
   /* TODO */
-  panic("not implemented yet\n");
+  
+  if (advice == MADV_NORMAL){
+    // check given memory valid or not
+    // if portion of memory region exceed process's memory size, return -1
+    if (len>myproc()->sz || base>myproc()->sz || base+len>myproc()->sz){
+      return -1;
+    } else {
+      return 0;
+    }
+  } 
+
+  else if (advice == MADV_DONTNEED){
+    return 0;
+  }
+
+  else if (advice == MADV_WILLNEED){
+    return 0;
+  }
+
+  else {
+    printf("option not found: %d\n", advice);
+    return -1;
+  }
 }
