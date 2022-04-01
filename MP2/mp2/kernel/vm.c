@@ -442,7 +442,7 @@ static int find_last_entry(pagetable_t pagetable){
   int res=0;
   int i;
   for(i = 0; i < 512; i++){
-    if(pagetable[i] & PTE_V){
+    if(pagetable[i] & PTE_V || pagetable[i] & PTE_S){
       res=i;
     }
   }
@@ -456,7 +456,7 @@ static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast,
     int last_entry = find_last_entry(pagetable);
     // 512 ptes
     for (int i=0;i<512;i++){
-      if (pagetable[i] & PTE_V){
+      if (pagetable[i] & PTE_V || pagetable[i] & PTE_S){
         // indention
         if (depth==2){
           if (isParentLast){
@@ -589,6 +589,11 @@ void vmprint(pagetable_t pagetable) {
 /* Map pages to physical memory or swap space. */
 int madvise(uint64 base, uint64 len, int advice) {
   /* TODO */
+
+  // if portion of memory region exceed process's memory size, return -1
+  if (len>myproc()->sz || base>myproc()->sz || base+len>myproc()->sz){
+      return -1;
+  } 
   
   if (advice == MADV_NORMAL){
     // check given memory valid or not
@@ -600,7 +605,45 @@ int madvise(uint64 base, uint64 len, int advice) {
     }
   } 
 
+  // move affected pages to swap space
   else if (advice == MADV_DONTNEED){
+    uint64 remain_len = len;
+    uint64 current_base = base;
+    while(remain_len>0){
+      pte_t *pte = walk(myproc()->pagetable, current_base, 0);
+      if (pte==0){
+        // entry not exist, don't need to move to swap space
+        // printf("1\n");
+        current_base+=PGSIZE;
+        remain_len-=PGSIZE;
+        continue;
+      } else {
+        // entry exist
+        // move to swap space if it's valid (PTE_V)
+        if (*pte & PTE_V){ 
+          // printf("2\n");
+          uint64 pa = PTE2PA(*pte);
+          *pte |= PTE_S; // set PTE_S bit
+          *pte &= ~PTE_V; // unset PTE_V bit
+          begin_op();
+          uint blockno = balloc_page(ROOTDEV); // allocate swap space
+          write_page_to_disk(ROOTDEV, (void*) pa, blockno); //??
+          end_op();
+          // free physical memory
+          kfree((void*)pa);
+          current_base+=PGSIZE;
+          remain_len-=PGSIZE;
+        }
+        // else, entry not mapped to physical memory, don't need to move to swap space
+        else {
+          // printf("3\n");
+          current_base+=PGSIZE;
+          remain_len-=PGSIZE;
+          continue;
+        }
+      }
+    }
+
     return 0;
   }
 
