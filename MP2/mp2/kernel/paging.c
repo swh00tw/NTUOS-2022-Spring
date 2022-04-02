@@ -16,6 +16,24 @@ int handle_pgfault() {
   // allocated physical address and retrieve it
   uint64 pa = (uint64)kalloc();
   struct proc *p = myproc();
+  pte_t *pte = walk(p->pagetable, va, 0);
+
+  // page fault handler for swapped page
+  if (*pte & PTE_S){
+    char* pa = kalloc();
+    uint64 blockno = PTE2BLOCKNO(*pte);
+    // read page from disk to physical memory
+    begin_op();
+    read_page_from_disk(ROOTDEV, pa, blockno);
+    bfree_page(ROOTDEV, blockno);
+    end_op();
+
+    *pte = PA2PTE(pa) | PTE_FLAGS(*pte); // set pa
+    *pte &= ~PTE_S; // unset PTE_S bit
+    *pte |= PTE_V; // set PTE_V bit
+
+    return 0;
+  }
 
   if (pa == 0) {
     // panic("out of memory");
