@@ -503,7 +503,7 @@ static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast,
             uint64 depth1Offset = (uint64) i*512*512*PGSIZE;
             va += depth1Offset;
           }
-          printf("└── %d: pte=%p va=%p",i,pagetable[i], va);
+          printf("└── %d: pte=%p va=%p",i,&pagetable[i], va);
           if (flag_S){
             printf(" blockno=%p", PTE2BLOCKNO(pagetable[i]));
           } else {
@@ -545,7 +545,7 @@ static void vmprint_children(pagetable_t pagetable, int depth, int isParentLast,
             uint64 depth1Offset = (uint64) i*512*512*PGSIZE;
             va += depth1Offset;
           }
-          printf("├── %d: pte=%p va=%p",i,pagetable[i], va);
+          printf("├── %d: pte=%p va=%p",i,&pagetable[i], va);
           if (flag_S){
             printf(" blockno=%p", PTE2BLOCKNO(pagetable[i]));
           } else {
@@ -623,14 +623,18 @@ int madvise(uint64 base, uint64 len, int advice) {
         if (*pte & PTE_V){ 
           // printf("2\n");
           uint64 pa = PTE2PA(*pte);
-          *pte |= PTE_S; // set PTE_S bit
-          *pte &= ~PTE_V; // unset PTE_V bit
           begin_op();
           uint blockno = balloc_page(ROOTDEV); // allocate swap space
           write_page_to_disk(ROOTDEV, (void*) pa, blockno); //??
           end_op();
           // free physical memory
           kfree((void*)pa);
+          
+          // update pte
+          *pte = BLOCKNO2PTE(blockno) | PTE_FLAGS(*pte); // set blockno
+          *pte |= PTE_S; // set PTE_S bit
+          *pte &= ~PTE_V; // unset PTE_V bit
+
           current_base+=PGSIZE;
           remain_len-=PGSIZE;
         }
@@ -647,7 +651,56 @@ int madvise(uint64 base, uint64 len, int advice) {
     return 0;
   }
 
+  // allocate pages in physical memory or swap back if it has S bit set, for virtual memory region [base, base+len]
   else if (advice == MADV_WILLNEED){
+    uint64 remain_len = len;
+    uint64 current_base = base;
+    while (remain_len>0){
+      pte_t *pte = walk(myproc()->pagetable, current_base, 0);
+      if (pte==0){
+        // entry not exist, don't need to do anything
+        // printf("1\n");
+        current_base+=PGSIZE;
+        remain_len-=PGSIZE;
+        continue;
+      } else {
+        // entry exist
+        // if it has S bit set, move it back to physical memory
+        if (*pte & PTE_S){
+          // printf("2\n");
+          char* pa = kalloc();
+          uint64 blockno = PTE2BLOCKNO(*pte);
+          // read page from disk to physical memory
+          begin_op();
+          read_page_from_disk(ROOTDEV, pa, blockno);
+          bfree_page(ROOTDEV, blockno);
+          end_op();
+
+          *pte = PA2PTE(pa) | PTE_FLAGS(*pte); // set pa
+          *pte &= ~PTE_S; // unset PTE_S bit
+          *pte |= PTE_V; // set PTE_V bit
+
+          current_base+=PGSIZE;
+          remain_len-=PGSIZE;
+        }
+        // if it's not valid (PTE_V), allocate physical memory
+        else if (!(*pte & PTE_V)){
+          // printf("3\n");
+          uint64 pa = (uint64)kalloc();
+          memset((void*)pa,0,PGSIZE);
+          int res = mappages(myproc()->pagetable, current_base, PGSIZE, pa, PTE_U|PTE_R|PTE_W|PTE_X);
+          if (res!=0){
+            // panic("mappages failed");
+            // deallocate the physical address
+            kfree((void*)pa);
+          }
+
+          current_base+=PGSIZE;
+          remain_len-=PGSIZE;
+        }
+      }
+    }
+
     return 0;
   }
 
