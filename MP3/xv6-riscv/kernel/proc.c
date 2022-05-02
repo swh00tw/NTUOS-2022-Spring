@@ -134,6 +134,13 @@ found:
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
 
+  // initalize attributes for mp3
+  p->thrdstop_delay = -1;
+  p->ticks=0;
+  for (int i = 0; i < MAX_THRD_NUM; i++) {
+    p->thrdstop_context_used[i] = 0;
+  }
+
   return p;
 }
 

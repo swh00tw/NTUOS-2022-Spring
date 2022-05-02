@@ -112,7 +112,29 @@ sys_thrdstop(void)
   if (argaddr(3, &handler_arg) < 0)
     return -1;
 
-  return 0;
+  // init attributes
+  struct proc *p = myproc();
+  p->thrdstop_delay = delay;
+  p->ticks = 0;
+  p->thrdstop_handler = handler;
+  p->handler_arg = handler_arg;
+
+  // return context id
+  if (thrdstop_context_id!=-1){
+    p->thrdstop_context_id = thrdstop_context_id;
+    return thrdstop_context_id;
+  } else {
+    // assign a new context id for calling thread
+    for (int i=0;i<MAX_THRD_NUM;i++){
+      if (p->thrdstop_context_used[i]==0){
+        p->thrdstop_context_used[i] = 1;
+        p->thrdstop_context_id = i;
+        return i;
+      }
+    }
+    // no context id available
+    return -1;
+  }
 }
 
 // for mp3

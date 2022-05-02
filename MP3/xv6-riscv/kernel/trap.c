@@ -79,7 +79,22 @@ usertrap(void)
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2)
   {
-    yield();
+    if (p->thrdstop_delay!=-1){
+      p->ticks++;
+      if (p->ticks == p->thrdstop_delay){
+        // save context first
+        p->thrdstop_context[p->thrdstop_context_id] = *p->trapframe;
+        // reset ticks & delay
+        p->ticks = 0;
+        p->thrdstop_delay = -1;
+        // switch to handler by manipulating the program counter
+        p->trapframe->epc = p->thrdstop_handler;
+        p->trapframe->a0 = p->handler_arg;
+      }
+    } else {
+      // Give up the CPU for one scheduling round.
+      yield();
+    }
   }
   usertrapret();
 }
