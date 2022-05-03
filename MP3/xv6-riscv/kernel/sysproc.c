@@ -158,5 +158,10 @@ sys_thrdresume(void)
   if (argint(0, &thrdstop_context_id) < 0)
     return -1;
 
+  struct proc *p = myproc();
+
+  // reload context from thrdstop_context[thrdstop_context_id]
+  p->trapframe = &p->thrdstop_context[thrdstop_context_id];
+
   return 0;
 }
