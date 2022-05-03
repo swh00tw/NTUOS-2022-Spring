@@ -147,7 +147,22 @@ sys_cancelthrdstop(void)
   if (argint(1, &is_exit) < 0)
     return -1;
 
-  return 0;
+  struct proc *p = myproc();
+  if (is_exit==0){
+    // store context by context id
+    if (thrdstop_context_id>=0 && thrdstop_context_id<MAX_THRD_NUM){
+      p->thrdstop_context[thrdstop_context_id] = *p->trapframe;
+    }
+  }
+  else {
+    // thread exit
+    // recycle context id
+    if (thrdstop_context_id>=0 && thrdstop_context_id<MAX_THRD_NUM){
+      p->thrdstop_context_used[thrdstop_context_id] = 0;
+    }
+  }
+
+  return p->ticks;
 }
 
 // for mp3
