@@ -84,8 +84,7 @@ usertrap(void)
       if (p->ticks == p->thrdstop_delay){
         // save context first
         p->thrdstop_context[p->thrdstop_context_id] = *p->trapframe;
-        // reset ticks & delay
-        p->ticks = 0;
+        // reset delay (timer)
         p->thrdstop_delay = -1;
         // switch to handler by manipulating the program counter
         p->trapframe->epc = p->thrdstop_handler;
@@ -179,8 +178,7 @@ kerneltrap()
       if (p->ticks == p->thrdstop_delay){
         // save context first
         p->thrdstop_context[p->thrdstop_context_id] = *p->trapframe;
-        // reset ticks & delay
-        p->ticks = 0;
+        // reset delay (timer)
         p->thrdstop_delay = -1;
         // switch to handler by manipulating the program counter
         p->trapframe->epc = p->thrdstop_handler;
