@@ -106,10 +106,6 @@ usertrapret(void)
 {
   struct proc *p = myproc();
 
-  /// for mp3.1.2
-  // store the current thread context
-  p->thrdstop_context[p->thrdstop_context_id] = *p->trapframe;
-
   // we're about to switch the destination of traps from
   // kerneltrap() to usertrap(), so turn off interrupts until
   // we're back in user space, where usertrap() is correct.

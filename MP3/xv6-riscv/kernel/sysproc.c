@@ -148,6 +148,7 @@ sys_cancelthrdstop(void)
     return -1;
 
   struct proc *p = myproc();
+  p->thrdstop_delay = -1;
   if (is_exit==0){
     // store context by context id
     if (thrdstop_context_id>=0 && thrdstop_context_id<MAX_THRD_NUM){
