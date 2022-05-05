@@ -1,0 +1,49 @@
+
+xv6 kernel is booting
+
+init: starting sh
+$ test2
+thrd1 exec 0 ticks
+thrd2 exec 0 ticks
+thrd3 exec 0 ticks
+thrd4 exec 0 ticks
+thrd5 exec 0 ticks
+thrd6 exec 0 ticks
+thrd7 exec 0 ticks
+thrd8 exec 0 ticks
+thrd9 exec 0 ticks
+thrd10 exec 0 ticks
+thrd11 exec 0 ticks
+thrd12 exec 0 ticks
+thrd13 exec 0 ticks
+thrd14 exec 0 ticks
+thrd15 exec 0 ticks
+thrd16 exec 0 ticks
+thrd17 exec 0 ticks
+thrd18 exec 0 ticks
+thrd19 exec 0 ticks
+thrd20 exec 0 ticks
+thrd21 exec 0 ticks
+thrd22 exec 0 ticks
+thrd23 exec 0 ticks
+thrd24 exec 0 ticks
+thrd25 exec 0 ticks
+thrd26 exec 0 ticks
+thrd27 exec 0 ticks
+thrd28 exec 0 ticks
+thrd29 exec 0 ticks
+thrd30 exec 0 ticks
+thrd31 exec 0 ticks
+thrd32 exec 0 ticks
+thrd33 exec 0 ticks
+thrd34 exec 0 ticks
+thrd35 exec 0 ticks
+thrd36 exec 0 ticks
+thrd37 exec 0 ticks
+thrd38 exec 0 ticks
+thrd39 exec 0 ticks
+thrd40 exec 0 ticks
+thrd41 exec 0 ticks
+test2k==41
+eac8a36c12c94b93e22928c1174372d15dca00a5724481788a7a0a901e065338 3
+$ qemu-system-riscv64: terminating on signal 15 from pid 9569 (make)

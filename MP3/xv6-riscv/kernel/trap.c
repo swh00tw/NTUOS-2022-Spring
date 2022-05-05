@@ -28,6 +28,87 @@ trapinithart(void)
 {
   w_stvec((uint64)kernelvec);
 }
+
+void
+restore_context_by_id(int thrdstop_context_id)
+{
+  // printf("load_context_by_id\n");
+  struct proc *p = myproc();
+  // reload context from thrdstop_context[thrdstop_context_id]
+  // p->trapframe = &(p->thrdstop_context[thrdstop_context_id]);
+  p->trapframe->s0 = p->thrdstop_context[thrdstop_context_id].s0;
+  p->trapframe->s1 = p->thrdstop_context[thrdstop_context_id].s1;
+  p->trapframe->s2 = p->thrdstop_context[thrdstop_context_id].s2;
+  p->trapframe->s3 = p->thrdstop_context[thrdstop_context_id].s3;
+  p->trapframe->s4 = p->thrdstop_context[thrdstop_context_id].s4;
+  p->trapframe->s5 = p->thrdstop_context[thrdstop_context_id].s5;
+  p->trapframe->s6 = p->thrdstop_context[thrdstop_context_id].s6;
+  p->trapframe->s7 = p->thrdstop_context[thrdstop_context_id].s7;
+  p->trapframe->s8 = p->thrdstop_context[thrdstop_context_id].s8;
+  p->trapframe->s9 = p->thrdstop_context[thrdstop_context_id].s9;
+  p->trapframe->s10 = p->thrdstop_context[thrdstop_context_id].s10;
+  p->trapframe->s11 = p->thrdstop_context[thrdstop_context_id].s11;
+  p->trapframe->t0 = p->thrdstop_context[thrdstop_context_id].t0;
+  p->trapframe->t1 = p->thrdstop_context[thrdstop_context_id].t1;
+  p->trapframe->t2 = p->thrdstop_context[thrdstop_context_id].t2;
+  p->trapframe->t3 = p->thrdstop_context[thrdstop_context_id].t3;
+  p->trapframe->t4 = p->thrdstop_context[thrdstop_context_id].t4;
+  p->trapframe->t5 = p->thrdstop_context[thrdstop_context_id].t5;
+  p->trapframe->t6 = p->thrdstop_context[thrdstop_context_id].t6;
+  p->trapframe->a0 = p->thrdstop_context[thrdstop_context_id].a0;
+  p->trapframe->a1 = p->thrdstop_context[thrdstop_context_id].a1;
+  p->trapframe->a2 = p->thrdstop_context[thrdstop_context_id].a2;
+  p->trapframe->a3 = p->thrdstop_context[thrdstop_context_id].a3;
+  p->trapframe->a4 = p->thrdstop_context[thrdstop_context_id].a4;
+  p->trapframe->a5 = p->thrdstop_context[thrdstop_context_id].a5;
+  p->trapframe->a6 = p->thrdstop_context[thrdstop_context_id].a6;
+  p->trapframe->a7 = p->thrdstop_context[thrdstop_context_id].a7;
+  p->trapframe->epc = p->thrdstop_context[thrdstop_context_id].epc;
+  p->trapframe->ra = p->thrdstop_context[thrdstop_context_id].ra;
+  p->trapframe->sp = p->thrdstop_context[thrdstop_context_id].sp;
+  p->trapframe->gp = p->thrdstop_context[thrdstop_context_id].gp;
+  p->trapframe->tp = p->thrdstop_context[thrdstop_context_id].tp;
+}
+
+void
+store_context_by_id(int thrdstop_context_id)
+{
+  // printf("store_context_by_id\n");
+  struct proc *p = myproc();
+  // p->thrdstop_context[thrdstop_context_id] = *p->trapframe;
+  p->thrdstop_context[thrdstop_context_id].s0 = p->trapframe->s0;
+  p->thrdstop_context[thrdstop_context_id].s1 = p->trapframe->s1;
+  p->thrdstop_context[thrdstop_context_id].s2 = p->trapframe->s2;
+  p->thrdstop_context[thrdstop_context_id].s3 = p->trapframe->s3;
+  p->thrdstop_context[thrdstop_context_id].s4 = p->trapframe->s4;
+  p->thrdstop_context[thrdstop_context_id].s5 = p->trapframe->s5;
+  p->thrdstop_context[thrdstop_context_id].s6 = p->trapframe->s6;
+  p->thrdstop_context[thrdstop_context_id].s7 = p->trapframe->s7;
+  p->thrdstop_context[thrdstop_context_id].s8 = p->trapframe->s8;
+  p->thrdstop_context[thrdstop_context_id].s9 = p->trapframe->s9;
+  p->thrdstop_context[thrdstop_context_id].s10 = p->trapframe->s10;
+  p->thrdstop_context[thrdstop_context_id].s11 = p->trapframe->s11;
+  p->thrdstop_context[thrdstop_context_id].t0 = p->trapframe->t0;
+  p->thrdstop_context[thrdstop_context_id].t1 = p->trapframe->t1;
+  p->thrdstop_context[thrdstop_context_id].t2 = p->trapframe->t2;
+  p->thrdstop_context[thrdstop_context_id].t3 = p->trapframe->t3;
+  p->thrdstop_context[thrdstop_context_id].t4 = p->trapframe->t4;
+  p->thrdstop_context[thrdstop_context_id].t5 = p->trapframe->t5;
+  p->thrdstop_context[thrdstop_context_id].t6 = p->trapframe->t6;
+  p->thrdstop_context[thrdstop_context_id].a0 = p->trapframe->a0;
+  p->thrdstop_context[thrdstop_context_id].a1 = p->trapframe->a1;
+  p->thrdstop_context[thrdstop_context_id].a2 = p->trapframe->a2;
+  p->thrdstop_context[thrdstop_context_id].a3 = p->trapframe->a3;
+  p->thrdstop_context[thrdstop_context_id].a4 = p->trapframe->a4;
+  p->thrdstop_context[thrdstop_context_id].a5 = p->trapframe->a5;
+  p->thrdstop_context[thrdstop_context_id].a6 = p->trapframe->a6;
+  p->thrdstop_context[thrdstop_context_id].a7 = p->trapframe->a7;
+  p->thrdstop_context[thrdstop_context_id].epc = p->trapframe->epc;
+  p->thrdstop_context[thrdstop_context_id].ra = p->trapframe->ra;
+  p->thrdstop_context[thrdstop_context_id].sp = p->trapframe->sp;
+  p->thrdstop_context[thrdstop_context_id].gp = p->trapframe->gp;
+  p->thrdstop_context[thrdstop_context_id].tp = p->trapframe->tp;
+}
  
 //
 // handle an interrupt, exception, or system call from user space.
@@ -81,14 +162,14 @@ usertrap(void)
   {
     if (p->thrdstop_delay!=-1){
       p->ticks++;
-      if (p->ticks == p->thrdstop_delay){
+      if (p->ticks >= p->thrdstop_delay){
         // save context first
-        p->thrdstop_context[p->thrdstop_context_id] = *p->trapframe;
+        store_context_by_id(p->thrdstop_context_id);
         // reset delay (timer)
         p->thrdstop_delay = -1;
         // switch to handler by manipulating the program counter
-        p->trapframe->epc = p->thrdstop_handler;
         p->trapframe->a0 = p->handler_arg;
+        p->trapframe->epc = p->thrdstop_handler;
       }
     } else {
       // Give up the CPU for one scheduling round.
@@ -105,6 +186,11 @@ void
 usertrapret(void)
 {
   struct proc *p = myproc();
+  // if thrd_resume, restore context
+  if (p->trapframe->a7==23){
+    // restore context
+    restore_context_by_id(p->thrdstop_context_id);
+  }
 
   // we're about to switch the destination of traps from
   // kerneltrap() to usertrap(), so turn off interrupts until
@@ -173,12 +259,12 @@ kerneltrap()
       p->ticks++;
       if (p->ticks == p->thrdstop_delay){
         // save context first
-        p->thrdstop_context[p->thrdstop_context_id] = *p->trapframe;
+        store_context_by_id(p->thrdstop_context_id);
         // reset delay (timer)
-        p->thrdstop_delay = -1;
+        // p->thrdstop_delay = -1;
         // switch to handler by manipulating the program counter
-        p->trapframe->epc = p->thrdstop_handler;
-        p->trapframe->a0 = p->handler_arg;
+        // p->trapframe->a0 = p->handler_arg;
+        // p->trapframe->epc = p->thrdstop_handler;
       }
     } else {
       // Give up the CPU for one scheduling round.

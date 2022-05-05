@@ -96,6 +96,86 @@ sys_uptime(void)
   return xticks;
 }
 
+void
+load_context_by_id(int thrdstop_context_id)
+{
+  // printf("load_context_by_id\n");
+  struct proc *p = myproc();
+  // reload context from thrdstop_context[thrdstop_context_id]
+  // p->trapframe = &(p->thrdstop_context[thrdstop_context_id]);
+  p->trapframe->s0 = p->thrdstop_context[thrdstop_context_id].s0;
+  p->trapframe->s1 = p->thrdstop_context[thrdstop_context_id].s1;
+  p->trapframe->s2 = p->thrdstop_context[thrdstop_context_id].s2;
+  p->trapframe->s3 = p->thrdstop_context[thrdstop_context_id].s3;
+  p->trapframe->s4 = p->thrdstop_context[thrdstop_context_id].s4;
+  p->trapframe->s5 = p->thrdstop_context[thrdstop_context_id].s5;
+  p->trapframe->s6 = p->thrdstop_context[thrdstop_context_id].s6;
+  p->trapframe->s7 = p->thrdstop_context[thrdstop_context_id].s7;
+  p->trapframe->s8 = p->thrdstop_context[thrdstop_context_id].s8;
+  p->trapframe->s9 = p->thrdstop_context[thrdstop_context_id].s9;
+  p->trapframe->s10 = p->thrdstop_context[thrdstop_context_id].s10;
+  p->trapframe->s11 = p->thrdstop_context[thrdstop_context_id].s11;
+  p->trapframe->t0 = p->thrdstop_context[thrdstop_context_id].t0;
+  p->trapframe->t1 = p->thrdstop_context[thrdstop_context_id].t1;
+  p->trapframe->t2 = p->thrdstop_context[thrdstop_context_id].t2;
+  p->trapframe->t3 = p->thrdstop_context[thrdstop_context_id].t3;
+  p->trapframe->t4 = p->thrdstop_context[thrdstop_context_id].t4;
+  p->trapframe->t5 = p->thrdstop_context[thrdstop_context_id].t5;
+  p->trapframe->t6 = p->thrdstop_context[thrdstop_context_id].t6;
+  p->trapframe->a0 = p->thrdstop_context[thrdstop_context_id].a0;
+  p->trapframe->a1 = p->thrdstop_context[thrdstop_context_id].a1;
+  p->trapframe->a2 = p->thrdstop_context[thrdstop_context_id].a2;
+  p->trapframe->a3 = p->thrdstop_context[thrdstop_context_id].a3;
+  p->trapframe->a4 = p->thrdstop_context[thrdstop_context_id].a4;
+  p->trapframe->a5 = p->thrdstop_context[thrdstop_context_id].a5;
+  p->trapframe->a6 = p->thrdstop_context[thrdstop_context_id].a6;
+  p->trapframe->a7 = p->thrdstop_context[thrdstop_context_id].a7;
+  p->trapframe->epc = p->thrdstop_context[thrdstop_context_id].epc;
+  p->trapframe->ra = p->thrdstop_context[thrdstop_context_id].ra;
+  p->trapframe->sp = p->thrdstop_context[thrdstop_context_id].sp;
+  p->trapframe->gp = p->thrdstop_context[thrdstop_context_id].gp;
+  p->trapframe->tp = p->thrdstop_context[thrdstop_context_id].tp;
+}
+
+void
+save_context_by_id(int thrdstop_context_id)
+{
+  printf("save_context_by_id\n");
+  struct proc *p = myproc();
+  p->thrdstop_context[thrdstop_context_id].s0 = p->trapframe->s0;
+  p->thrdstop_context[thrdstop_context_id].s1 = p->trapframe->s1;
+  p->thrdstop_context[thrdstop_context_id].s2 = p->trapframe->s2;
+  p->thrdstop_context[thrdstop_context_id].s3 = p->trapframe->s3;
+  p->thrdstop_context[thrdstop_context_id].s4 = p->trapframe->s4;
+  p->thrdstop_context[thrdstop_context_id].s5 = p->trapframe->s5;
+  p->thrdstop_context[thrdstop_context_id].s6 = p->trapframe->s6;
+  p->thrdstop_context[thrdstop_context_id].s7 = p->trapframe->s7;
+  p->thrdstop_context[thrdstop_context_id].s8 = p->trapframe->s8;
+  p->thrdstop_context[thrdstop_context_id].s9 = p->trapframe->s9;
+  p->thrdstop_context[thrdstop_context_id].s10 = p->trapframe->s10;
+  p->thrdstop_context[thrdstop_context_id].s11 = p->trapframe->s11;
+  p->thrdstop_context[thrdstop_context_id].t0 = p->trapframe->t0;
+  p->thrdstop_context[thrdstop_context_id].t1 = p->trapframe->t1;
+  p->thrdstop_context[thrdstop_context_id].t2 = p->trapframe->t2;
+  p->thrdstop_context[thrdstop_context_id].t3 = p->trapframe->t3;
+  p->thrdstop_context[thrdstop_context_id].t4 = p->trapframe->t4;
+  p->thrdstop_context[thrdstop_context_id].t5 = p->trapframe->t5;
+  p->thrdstop_context[thrdstop_context_id].t6 = p->trapframe->t6;
+  p->thrdstop_context[thrdstop_context_id].a0 = p->trapframe->a0;
+  p->thrdstop_context[thrdstop_context_id].a1 = p->trapframe->a1;
+  p->thrdstop_context[thrdstop_context_id].a2 = p->trapframe->a2;
+  p->thrdstop_context[thrdstop_context_id].a3 = p->trapframe->a3;
+  p->thrdstop_context[thrdstop_context_id].a4 = p->trapframe->a4;
+  p->thrdstop_context[thrdstop_context_id].a5 = p->trapframe->a5;
+  p->thrdstop_context[thrdstop_context_id].a6 = p->trapframe->a6;
+  p->thrdstop_context[thrdstop_context_id].a7 = p->trapframe->a7;
+  p->thrdstop_context[thrdstop_context_id].epc = p->trapframe->epc;
+  p->thrdstop_context[thrdstop_context_id].ra = p->trapframe->ra;
+  p->thrdstop_context[thrdstop_context_id].sp = p->trapframe->sp;
+  p->thrdstop_context[thrdstop_context_id].gp = p->trapframe->gp;
+  p->thrdstop_context[thrdstop_context_id].tp = p->trapframe->tp;
+}
+
 
 // for mp3
 uint64
@@ -152,7 +232,7 @@ sys_cancelthrdstop(void)
   if (is_exit==0){
     // store context by context id
     if (thrdstop_context_id>=0 && thrdstop_context_id<MAX_THRD_NUM){
-      p->thrdstop_context[thrdstop_context_id] = *p->trapframe;
+      save_context_by_id(thrdstop_context_id);
     }
   }
   else {
@@ -175,9 +255,9 @@ sys_thrdresume(void)
     return -1;
 
   struct proc *p = myproc();
-
-  // reload context from thrdstop_context[thrdstop_context_id]
-  p->trapframe = &p->thrdstop_context[thrdstop_context_id];
+  p->thrdstop_context_id = thrdstop_context_id;
+  // printf("syscall number: %d\n", p->trapframe->a7);
+  // restore_context_by_id(thrdstop_context_id);
 
   return 0;
 }

@@ -1,0 +1,18 @@
+{
+  "files.associations": {
+    "*.ejs": "html",
+    "__locale": "c",
+    "__string": "c",
+    "cstdlib": "c",
+    "memory_resource": "c",
+    "locale": "c",
+    "ostream": "c",
+    "system_error": "c",
+    "typeinfo": "c",
+    "version": "c",
+    "concepts": "c",
+    "type_traits": "c",
+    "*.inc": "c",
+    "*.def": "c"
+  }
+}
