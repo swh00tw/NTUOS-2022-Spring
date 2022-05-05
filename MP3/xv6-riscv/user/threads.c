@@ -71,7 +71,7 @@ void add_from_adding_queue(){
     while( tmp_node != NULL ){
         struct adding_thread_node *to_remove = tmp_node;
         tmp_node = tmp_node->next;
-        if( threading_system_time >= adding_queue->adding_time ){
+        if( threading_system_time >= to_remove->adding_time ){
             // printf("adding\n");
             thread_add_runqueue( to_remove->thrd ) ;
             if( to_remove->next != to_remove ){
