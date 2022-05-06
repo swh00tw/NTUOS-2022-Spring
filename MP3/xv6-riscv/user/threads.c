@@ -208,17 +208,17 @@ void FCFS_scheduler(void){
     }
 }
 
-static int time_quantuam_count = 0;
+static int RR_time_quantuam_count = 0;
 const int RR_time_quantuam = 3;
 void RR_scheduler(void){
     if ( is_thread_start ==0){
         // execute the first thread in wait_queue at time==0
         return;
     } else {
-        time_quantuam_count ++;
-        if (current_thread->is_exited == 1 || current_thread->is_yield == 1 || time_quantuam_count == RR_time_quantuam){
+        RR_time_quantuam_count ++;
+        if (current_thread->is_exited == 1 || current_thread->is_yield == 1 || RR_time_quantuam_count == RR_time_quantuam){
             current_thread = current_thread->next;
-            time_quantuam_count = 0;
+            RR_time_quantuam_count = 0;
         } 
     }
 }
@@ -260,7 +260,48 @@ void SJF_scheduler(void){
     }
 }
 
-void PSJF_scheduler(void){}
+static int PSJF_time_quantum_count = 0;
+void PSJF_scheduler(void){
+    struct thread *visit_thread;
+    struct thread *shortest_thread;
+    if ( is_thread_start ==0){
+        // execute the first thread with the shortest execution time in wait_queue at time==0
+        visit_thread = current_thread->next;
+        shortest_thread = current_thread;
+        while (visit_thread != current_thread){
+            if (visit_thread->remain_execution_time < shortest_thread->remain_execution_time){
+                shortest_thread = visit_thread;
+            } else if (visit_thread->remain_execution_time == shortest_thread->remain_execution_time){
+                shortest_thread = visit_thread->ID < shortest_thread->ID ? visit_thread : shortest_thread;
+            }
+            visit_thread = visit_thread->next;
+        }
+        current_thread = shortest_thread;
+    } else {
+        PSJF_time_quantum_count++;
+        if (current_thread->is_exited == 1 || current_thread->is_yield == 1 || PSJF_time_quantum_count == 1){
+            visit_thread = current_thread->next;
+            shortest_thread = current_thread->is_exited==1 ? current_thread->next : current_thread ;
+            // traverse the wait_queue (linked list)
+            while(visit_thread != current_thread){
+                if (visit_thread->remain_execution_time < shortest_thread->remain_execution_time){
+                    shortest_thread = visit_thread;
+                } else if (visit_thread->remain_execution_time == shortest_thread->remain_execution_time){
+                    // choose the thread with lower ID
+                    shortest_thread = visit_thread->ID < shortest_thread->ID ? visit_thread : shortest_thread;
+                }
+                // visit next
+                visit_thread = visit_thread->next;
+            }
+
+            if (PSJF_time_quantum_count == 1){
+                PSJF_time_quantum_count = 0;
+            }
+            // set current_thread to shortest_thread
+            current_thread = shortest_thread;
+        }
+    }
+}
 
 void schedule(void){
     #ifdef THREAD_SCHEDULER_DEFAULT
