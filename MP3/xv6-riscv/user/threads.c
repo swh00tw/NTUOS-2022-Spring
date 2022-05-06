@@ -195,6 +195,25 @@ void dispatch(void){
     }
     thread_exit();
 }
+
+void FCFS_scheduler(void){
+    if ( is_thread_start ==0){
+        // execute the first thread in wait_queue at time==0
+        return;
+    } else {
+        if (current_thread->is_exited == 1){
+            // run next thread
+            current_thread = current_thread->next;
+        }
+    }
+}
+
+void RR_scheduler(void){}
+
+void SJF_scheduler(void){}
+
+void PSJF_scheduler(void){}
+
 void schedule(void){
     #ifdef THREAD_SCHEDULER_DEFAULT
 
@@ -212,29 +231,23 @@ void schedule(void){
 
     #ifdef THREAD_SCHEDULER_RR
     // ... implement RR here.
+        RR_scheduler();
     #endif
 
     #ifdef THREAD_SCHEDULER_FCFS
     // ... implement FCFS here
-
-    if ( is_thread_start ==0){
-        // execute the first thread in wait_queue at time==0
-        return;
-    } else {
-        if (current_thread->is_exited == 1){
-            // run next thread
-            current_thread = current_thread->next;
-        }
-    }
+        FCFS_scheduler();    
     #endif
 
 
     #ifdef THREAD_SCHEDULER_SJF
     // ... implement SJF here.
+        SJF_scheduler();
     #endif
 
     #ifdef THREAD_SCHEDULER_PSJF
     // ... implement PSJF here.
+        PSJF_scheduler();
     #endif
 
 }
