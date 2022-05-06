@@ -140,7 +140,7 @@ load_context_by_id(int thrdstop_context_id)
 void
 save_context_by_id(int thrdstop_context_id)
 {
-  printf("save_context_by_id\n");
+  // printf("save_context_by_id\n");
   struct proc *p = myproc();
   p->thrdstop_context[thrdstop_context_id].s0 = p->trapframe->s0;
   p->thrdstop_context[thrdstop_context_id].s1 = p->trapframe->s1;
