@@ -208,7 +208,20 @@ void FCFS_scheduler(void){
     }
 }
 
-void RR_scheduler(void){}
+static int time_quantuam_count = 0;
+const int RR_time_quantuam = 3;
+void RR_scheduler(void){
+    if ( is_thread_start ==0){
+        // execute the first thread in wait_queue at time==0
+        return;
+    } else {
+        time_quantuam_count ++;
+        if (current_thread->is_exited == 1 || current_thread->is_yield == 1 || time_quantuam_count == RR_time_quantuam){
+            current_thread = current_thread->next;
+            time_quantuam_count = 0;
+        } 
+    }
+}
 
 void SJF_scheduler(void){}
 
