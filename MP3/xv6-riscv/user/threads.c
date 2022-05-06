@@ -216,6 +216,16 @@ void schedule(void){
 
     #ifdef THREAD_SCHEDULER_FCFS
     // ... implement FCFS here
+
+    if ( is_thread_start ==0){
+        // execute the first thread in wait_queue at time==0
+        return;
+    } else {
+        if (current_thread->is_exited == 1){
+            // run next thread
+            current_thread = current_thread->next;
+        }
+    }
     #endif
 
 
