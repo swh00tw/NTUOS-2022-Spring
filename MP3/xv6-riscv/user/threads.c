@@ -223,7 +223,42 @@ void RR_scheduler(void){
     }
 }
 
-void SJF_scheduler(void){}
+void SJF_scheduler(void){
+    struct thread *visit_thread;
+    struct thread *shortest_thread;
+    if ( is_thread_start ==0){
+        // execute the first thread with the shortest execution time in wait_queue at time==0
+        visit_thread = current_thread->next;
+        shortest_thread = current_thread;
+        while (visit_thread != current_thread){
+            if (visit_thread->remain_execution_time < shortest_thread->remain_execution_time){
+                shortest_thread = visit_thread;
+            } else if (visit_thread->remain_execution_time == shortest_thread->remain_execution_time){
+                shortest_thread = visit_thread->ID < shortest_thread->ID ? visit_thread : shortest_thread;
+            }
+            visit_thread = visit_thread->next;
+        }
+        current_thread = shortest_thread;
+    } else {
+        if (current_thread->is_exited == 1 || current_thread->is_yield == 1){
+            visit_thread = current_thread->next;
+            shortest_thread = current_thread->is_exited==1 ? current_thread->next : current_thread ;
+            // traverse the wait_queue (linked list)
+            while(visit_thread != current_thread){
+                if (visit_thread->remain_execution_time < shortest_thread->remain_execution_time){
+                    shortest_thread = visit_thread;
+                } else if (visit_thread->remain_execution_time == shortest_thread->remain_execution_time){
+                    // choose the thread with lower ID
+                    shortest_thread = visit_thread->ID < shortest_thread->ID ? visit_thread : shortest_thread;
+                }
+                // visit next
+                visit_thread = visit_thread->next;
+            }
+            // set current_thread to shortest_thread
+            current_thread = shortest_thread;
+        }
+    }
+}
 
 void PSJF_scheduler(void){}
 
