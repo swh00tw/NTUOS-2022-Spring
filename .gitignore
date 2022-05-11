@@ -3,3 +3,9 @@
 .zip
 node_modules/
 yarn.lock
+*.o
+*.sym
+*.d
+*.img
+*.asm
+.S
