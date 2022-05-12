@@ -372,7 +372,7 @@ iunlockput(struct inode *ip)
 // are listed in ip->addrs[].  The next NINDIRECT blocks are
 // listed in block ip->addrs[NDIRECT].
 
-// Return the disk block address of the nth block in inode ip.
+// Return the disk block address of the nth block (bn) in inode ip.
 // If there is no such block, bmap allocates one.
 static uint
 bmap(struct inode *ip, uint bn)
@@ -380,6 +380,11 @@ bmap(struct inode *ip, uint bn)
   // TODO: Large Files
   // You should modify bmap(),
   // so that it can handle doubly indrect inode.
+
+  // number of doubly indirect blocks (total 13 addrs, 10 direct, 1 singly indirect)
+  // 1st doubly indirect blocks is at ip->addrs[NDIRECT + 1]
+  int NDINDIRECT = 2;
+
   uint addr, *a;
   struct buf *bp;
 
@@ -402,6 +407,42 @@ bmap(struct inode *ip, uint bn)
     }
     brelse(bp);
     return addr;
+  }
+  bn-= NINDIRECT;
+
+  int i=0;
+  while (i<NDINDIRECT){
+    if (bn< NINDIRECT * NINDIRECT){
+      // Load doubly indirect block, allocating if necessary.
+      if ((addr = ip->addrs[NDIRECT + 1 + i]) == 0){
+        // allocate doubly indirect block
+        ip->addrs[NDIRECT + 1 + i] = addr = balloc(ip->dev);
+      }
+      // read the block to buf bp
+      bp = bread(ip->dev, addr);
+      a = (uint*)bp->data;
+
+      // Load (bn/256)-th indirect block, allocating if necessary
+      if  ((addr = a[bn/NINDIRECT]) == 0){
+        a[bn/NINDIRECT] = addr = balloc(ip->dev);
+        log_write(bp); // write the block to log when committing
+      }
+      brelse(bp); // release buf
+
+      // read the block to buf bp
+      bp = bread(ip->dev, addr);
+      a = (uint*)bp->data;
+
+      // load (bn%256)-th block, allocating if necessary
+      if ((addr = a[bn%NINDIRECT]) == 0){
+        a[bn%NINDIRECT] = addr = balloc(ip->dev);
+        log_write(bp); // write the block to log when committing
+      }
+      brelse(bp); // release buf
+      return addr;
+    }
+    bn -= NINDIRECT * NINDIRECT;
+    i++;
   }
 
   panic("bmap: out of range");

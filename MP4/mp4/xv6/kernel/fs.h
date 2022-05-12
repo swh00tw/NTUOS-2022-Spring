@@ -27,10 +27,9 @@ struct superblock {
 // TODO: bigfile
 // You may need to modify these.
 // sizeof(uint) is 4 (bytes).
-#define NDIRECT 12
-#define NINDIRECT (BSIZE / sizeof(uint))
-#define MAXFILE (NDIRECT + NINDIRECT)
-
+#define NDIRECT 10
+#define NINDIRECT (BSIZE / sizeof(uint)) // 256
+#define MAXFILE (NDIRECT + 1 * NINDIRECT + 2 * NINDIRECT * NINDIRECT) // 10 + 1 * 256 + 2 * 256^2 = 131338 blocks
 // On-disk inode structure
 
 struct dinode {
