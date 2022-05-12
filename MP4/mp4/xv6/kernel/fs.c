@@ -456,9 +456,10 @@ itrunc(struct inode *ip)
   // TODO: Large Files
   // You should modify itruc(),
   // so that it can handle doubly indrect inode.
-  int i, j;
-  struct buf *bp;
-  uint *a;
+  int NDINDIRECT = 2; // num of doubly indirect blocks
+  int i, j, k;
+  struct buf *bp, *bp2;
+  uint *a, *a2;
 
   for(i = 0; i < NDIRECT; i++){
     if(ip->addrs[i]){
@@ -477,6 +478,38 @@ itrunc(struct inode *ip)
     brelse(bp);
     bfree(ip->dev, ip->addrs[NDIRECT]);
     ip->addrs[NDIRECT] = 0;
+  }
+
+  // clear doubly indirect blocks 
+  i = 0;
+  while (i < NDINDIRECT){
+    if (ip->addrs[NDIRECT + 1 + i]){
+      bp = bread(ip->dev, ip->addrs[NDIRECT + 1 + i]);
+      a = (uint*)bp->data;
+      // traverse depth 1
+      for (j=0;j<NINDIRECT;j++){
+        if (a[j]){
+          bp2 = bread(ip->dev, a[j]);
+          a2 = (uint*)bp2->data;
+          // traverse depth 2
+          for (k=0;k<NINDIRECT;k++){
+            if (a2[k])
+              bfree(ip->dev, a2[k]);
+          }
+          // finish depth 2, release buf
+          brelse(bp2);
+          // free the block
+          bfree(ip->dev, a[j]);
+        }
+      }
+      // finish depth 1, release buf
+      brelse(bp);
+      // free the block
+      bfree(ip->dev, ip->addrs[NDIRECT + 1 + i]);
+      // clear ip->addrs[NDIRECT + 1 + i]
+      ip->addrs[NDIRECT + 1 + i] = 0;
+    }
+    i++;
   }
 
   ip->size = 0;
