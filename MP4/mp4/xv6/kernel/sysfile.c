@@ -298,10 +298,44 @@ sys_open(void)
   struct inode *ip;
   int n;
 
+  const int threshold=10; // to stop infinite loop
+  int iter = 0; // to track number of while loop
+
   if((n = argstr(0, path, MAXPATH)) < 0 || argint(1, &omode) < 0)
     return -1;
 
   begin_op();
+
+  if(!(omode & O_NOFOLLOW)){
+    while(1){
+      if (iter>threshold){
+        end_op();
+        return -1; // detect infinite loop
+      }
+      // if file does not exist
+      if((ip = namei(path)) == 0){
+        break;
+      }
+
+      // if file is NOT a symbolic link, stop and terminate the loop
+      ilock(ip);
+      if(ip->type != T_SYMLINK){
+        iunlockput(ip);
+        break;
+      }
+      // if file is a symbolic link, read the path in the symbolic link
+      // and continue the loop
+      else {
+        if(readi(ip, 0, (uint64)path, 0, sizeof(path)) != sizeof(path)){
+          // error when reading the path in the symbolic link
+          end_op();
+          return -1;
+        }
+        iunlockput(ip);
+        iter++;
+      }
+    }
+  }
 
   if(omode & O_CREATE){
     ip = create(path, T_FILE, 0, 0);
@@ -500,15 +534,29 @@ sys_symlink(void)
 {
   // TODO: symbolic link
   // You should implement this symlink system call.
-  // char target[MAXPATH], path[MAXPATH];
+  char target[MAXPATH], path[MAXPATH];
   // int fd;
   // struct file *f;
-  // struct inode *ip;
+  struct inode *ip;
 
-  // if(argstr(0, target, MAXPATH) < 0 || argstr(1, path, MAXPATH) < 0)
-  //   return -1;
-  
-  panic("You should implement symlink system call.");
+  if(argstr(0, target, MAXPATH) < 0 || argstr(1, path, MAXPATH) < 0)
+    return -1;
+
+  // create an inode at path
+  begin_op();
+  if((ip = create(path, T_SYMLINK, 0, 0)) == 0){
+    end_op();
+    return -1; // failed to create inode
+  }
+  // write target address to the inode by using writei
+  // if return value is less than requested size, writei failed
+  if (writei(ip,0,(uint64)target,0,sizeof(target))!=sizeof(target)){
+    end_op();
+    return -1; // failed to write target address
+  }
+  // close the inode
+  iunlockput(ip);
+  end_op();
 
   return 0;
 }
