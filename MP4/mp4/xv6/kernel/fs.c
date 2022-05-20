@@ -496,13 +496,15 @@ itrunc(struct inode *ip)
             if (a2[k])
               bfree(ip->dev, a2[k]);
           }
-          // finish depth 2, release buf
+          // finish depth 2, log_write & release buf
+          log_write(bp2);
           brelse(bp2);
           // free the block
           bfree(ip->dev, a[j]);
         }
       }
-      // finish depth 1, release buf
+      // finish depth 1, log_write & release buf
+      log_write(bp);
       brelse(bp);
       // free the block
       bfree(ip->dev, ip->addrs[NDIRECT + 1 + i]);

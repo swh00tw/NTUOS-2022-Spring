@@ -7,11 +7,10 @@ hart 2 starting
 init: starting sh
 $ bigfile
 ..
-wrote 268 blocks
-FAILURE: bigfile: file is too small
-
-..
-wrote 268 blocks
-FAILURE: bigfile: file is too small
-
-$ qemu-system-riscv64: terminating on signal 15 from pid 215 (make)
+wrote 270 blocks
+public testcase 1: ok
+..................................................................
+wrote 6666 blocks
+public testcase 2: ok
+panic: too big a transaction
+qemu-system-riscv64: terminating on signal 2
