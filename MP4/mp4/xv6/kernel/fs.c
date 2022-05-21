@@ -703,6 +703,14 @@ skipelem(char *path, char *name)
   return path;
 }
 
+int update_loop(int curr_count, int threshold){
+  if(curr_count > threshold){
+    return -1;
+  }
+  int next_count = curr_count + 1;
+  return next_count;
+}
+
 // Look up and return the inode for a path name.
 // If parent != 0, return the inode for the parent and copy the final
 // path element into name, which must have room for DIRSIZ bytes.
@@ -713,28 +721,61 @@ namex(char *path, int nameiparent, char *name)
   // TODO: Symbolic Link to Directories
   // Modify this function to deal with symbolic links to directories.
   struct inode *ip, *next;
-  
+  int iter = 0; // for detect infinite loop
+  const int threshold = 10; // for detect infinite loop
+  char target[MAXPATH]; // target of symbolic link
+  char buf[MAXPATH];
+
   if(*path == '/')
     ip = iget(ROOTDEV, ROOTINO);
   else
     ip = idup(myproc()->cwd);
 
+  // skipelem returns 0 if no more elements
+  // or return next element in path given name
   while((path = skipelem(path, name)) != 0){
     ilock(ip);
     if(ip->type != T_DIR){
       iunlockput(ip);
       return 0;
     }
+    // path is the last element: '\0'
     if(nameiparent && *path == '\0'){
       // Stop one level early.
       iunlock(ip);
       return ip;
     }
+    // dirlookup returns 0 if not found,
+    // or return inode 
     if((next = dirlookup(ip, name, 0)) == 0){
       iunlockput(ip);
       return 0;
     }
     iunlockput(ip);
+
+    // if next is a symbolic link (AND not the last)
+    // change path when find a symbolic link
+    if (*path!='\0'){
+      if (next->type == T_SYMLINK){
+        ilock(next); // lock next inode
+        if ((iter=update_loop(iter, threshold))==-1){
+          iunlockput(next);
+          return 0;
+        }
+        if (readi(next, 0, (uint64)target, 0, sizeof(target)) != sizeof(target)){
+          // read error
+          iunlockput(next);
+          return 0;
+        }
+        // update path
+        strcat(strcat(target, "/"), path);
+        path = strncpy(buf, target, sizeof(target));
+
+        iunlockput(next);
+        ip = iget(ROOTDEV, ROOTINO); // from root
+        continue;
+      }
+    }
     ip = next;
   }
   if(nameiparent){
