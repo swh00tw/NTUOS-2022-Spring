@@ -306,6 +306,7 @@ sys_open(void)
 
   begin_op();
 
+  // if following mode, recursively follow symbolic links
   if(!(omode & O_NOFOLLOW)){
     while(1){
       if (iter>threshold){
