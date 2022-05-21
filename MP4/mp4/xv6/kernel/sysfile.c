@@ -430,6 +430,14 @@ sys_mknod(void)
   return 0;
 }
 
+int update_and_detect_loop(int curr_count, int threshold){
+  if(curr_count > threshold){
+    return -1;
+  }
+  int next_count = curr_count + 1;
+  return next_count;
+}
+
 uint64
 sys_chdir(void)
 {
@@ -440,18 +448,50 @@ sys_chdir(void)
   char path[MAXPATH];
   struct inode *ip;
   struct proc *p = myproc();
+  const int threshold=10; // to stop infinite loop
+  int iter = 0; // to track number of while loop
   
   begin_op();
   if(argstr(0, path, MAXPATH) < 0 || (ip = namei(path)) == 0){
     end_op();
     return -1;
   }
-  ilock(ip);
-  if(ip->type != T_DIR){
-    iunlockput(ip);
-    end_op();
-    return -1;
+
+  // if symbolic link, follow the link
+  while(1){
+    // some checks on edge cases
+    iter = update_and_detect_loop(iter, threshold);
+    if (iter==-1){ // max number of iterations reached
+      end_op();
+      return -1;
+    }
+    ip = namei(path);
+    if(ip == 0){ // no such path
+      end_op();
+      return -1;
+    }
+    ilock(ip);
+    if (ip->type!=T_DIR && ip->type!=T_SYMLINK){ // ip is not directory or symbolic link
+      iunlockput(ip);
+      end_op();
+      return -1;
+    }
+    // Now ip is either T_DIR or T_SYMLINK
+    // if it's symbolic link, read the path in the symbolic link
+    if (ip->type == T_SYMLINK) {
+      if(readi(ip, 0, (uint64)path, 0, sizeof(path)) != sizeof(path)){
+        // error when reading the path in the symbolic link
+        end_op();
+        return -1;
+      }
+      iunlockput(ip);
+    }
+    // if it's directory, stop the loop
+    else {
+      break;
+    }
   }
+
   iunlock(ip);
   iput(p->cwd);
   end_op();
