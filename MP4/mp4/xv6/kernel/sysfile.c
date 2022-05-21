@@ -314,6 +314,8 @@ sys_open(void)
       }
       // if file does not exist
       if((ip = namei(path)) == 0){
+        // end_op();
+        // return -1; // ???
         break;
       }
 
